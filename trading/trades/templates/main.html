@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <title>Trades</title>
+</head>
+<body>
+  <div class="container mt-3">
+  <div class = "table-responsive">
+        <table class = "table table-bordered table-hover" style = "text-align: center; vertical-align: middle;">
+          <thead>
+            <tr>
+              <th colspan="3">BID</th>
+              <th></th>
+              <th colspan="3">ASK</th>
+              <th>TAPE</th>
+            </tr>
+          </thead>
+
+          <tbody style="font-weight: 600;">
+            <tr>
+              <td>Exchange</td>
+              <td>T volume</td>
+              <td>Volume</td>
+              <td>Price</td>
+              <td>Volume</td>
+              <td>T volume</td>
+              <td>Exchange</td>
+              <td></td>
+            </tr>
+            
+
+            
+              {% for ask in asks %}
+                
+                {% with ask_item=ask.ASKS.0 %}
+                <tr>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td style = "background-color: {{ask.color}}; color: {{ask.fontcolor}};">{{ask.ASK_PRICE}}</td>
+                  <td style = "background-color: {{ask.color}}; color: {{ask.fontcolor}};">{{ask_item.ASK_VOLUME}}</td>
+                  <td rowspan={{ask.NUM_ASKS}} style = "background-color: {{ask.color}}; color: {{ask.fontcolor}};" class = 'total_volume'>{{ask.TOTAL_VOLUME}}</td>
+                  <td style = "background-color: {{ask.color}}; color: {{ask.fontcolor}};">{{ask_item.EXCHANGE}}</td>
+                  
+                </tr>
+
+                {% endwith %}
+
+                {% for ask_item in ask.ASKS %}
+                  {% if forloop.counter > 1 %}
+                        <tr>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td style = "background-color: {{ask.color}}; color: {{ask.fontcolor}};">{{ask.ASK_PRICE}}</td>
+                          <td style = "background-color: {{ask.color}}; color: {{ask.fontcolor}};">{{ask_item.ASK_VOLUME}}</td>
+                          
+                          <td style = "background-color: {{ask.color}}; color: {{ask.fontcolor}};">{{ask_item.EXCHANGE}}</td>
+                        </tr>
+                  {% endif %}
+                
+                {% endfor %}
+              {% endfor %}
+            
+              {% for price in prices %}
+
+                  <tr>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+
+                  <td>{{price}}</td>
+                  </tr>
+
+              {% endfor %}
+
+              
+              {% for bid in bids %}
+
+                {% with bid_item=bid.BIDS.0 %}
+              
+                <tr>
+                  <td style = "background-color: {{bid.color}}; color: {{bid.fontcolor}};">{{bid_item.EXCHANGE}}</td>
+                  <td rowspan={{bid.NUM_BIDS}} style = "background-color: {{bid.color}}; color: {{bid.fontcolor}};" class = 'total_volume'>{{bid.TOTAL_VOLUME}}</td>
+                  <td style = "background-color: {{bid.color}}; color: {{bid.fontcolor}};">{{bid_item.BID_VOLUME}}</td>
+                  <td style = "background-color: {{bid.color}}; color: {{bid.fontcolor}};">{{bid.BID_PRICE}}</td>
+                </tr>
+
+                {% endwith %}
+
+                {% for bid_item in bid.BIDS %}
+                  {% if forloop.counter > 1 %}
+                        <tr>
+                          <td style = "background-color: {{bid.color}}; color: {{bid.fontcolor}};">{{bid_item.EXCHANGE}}</td>
+                          
+                          <td style = "background-color: {{bid.color}}; color: {{bid.fontcolor}};">{{bid_item.BID_VOLUME}}</td>
+                          <td style = "background-color: {{bid.color}}; color: {{bid.fontcolor}};">{{bid.BID_PRICE}}</td>
+                        </tr>
+                  {% endif %}
+                
+                {% endfor %}
+              {% endfor %}
+
+          </tbody>
+        </table>
+  </div>
+  </div>
+
+
+</body>
+
+<script>
+    const elements = document.getElementsByClassName('total_volume');
+    for(let i = 0; i<elements.length; i++){
+      total_volume = parseInt(elements[i].innerHTML);
+      if(total_volume>300)
+        elements[i].style.fontSize = "18px";
+      else if(total_volume>1000)
+        elements[i].style.fontSize = "20px";
+      else if(total_volume>10000)
+        elements[i].style.fontSize = "24px";
+    }
+</script>
+
+</html>

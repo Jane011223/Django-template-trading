@@ -1,0 +1,15 @@
+{
+    "service": "TIMESALE_EQUITY",
+    "timestamp": 1680836277960,
+    "command": "SUBS",
+    "content": [
+        {
+            "seq": 28241,
+            "key": "AMZN",
+            "TRADE_TIME": 1680825599251,
+            "LAST_PRICE": 101.89,
+            "LAST_SIZE": 14.0,
+            "LAST_SEQUENCE": 160801
+        }
+    ]
+}

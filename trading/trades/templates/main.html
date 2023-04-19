@@ -6,124 +6,140 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
   <title>Trades</title>
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 </head>
 <body>
-  <div class="container mt-3">
-  <div class = "table-responsive">
-        <table class = "table table-bordered table-hover" style = "text-align: center; vertical-align: middle;">
+  <div class="container mt-3" style="display: flex;">
+    <div class = "table-responsive" style = "flex: 0.8;">
+          <table class = "table table-bordered table-hover" style = "text-align: center; vertical-align: middle;">
+            <thead>
+              <tr>
+                <th colspan="3">BID</th>
+                <th></th>
+                <th colspan="3">ASK</th>
+              </tr>
+              <tr>
+                <th>Exchange</th>
+                <th>T volume</th>
+                <th>Volume</th>
+                <th>Price</th>
+                <th>Volume</th>
+                <th>T volume</th>
+                <th>Exchange</th>
+              </tr>
+            </thead>
+
+            <tbody id = "bidask_tbody" style="font-weight: 600; line-height: 1;">
+        
+            </tbody>
+          </table>
+    </div>
+    <div class = "table-responsive" style = "flex: 0.2;">
+          <table class = "table table-bordered table-hover" style = "text-align: center; vertical-align: middle; ">
           <thead>
             <tr>
-              <th colspan="3">BID</th>
+              <th colspan="2">TAPE</th>
+            </tr>
+            <tr>
+              <th>Price</th>
               <th></th>
-              <th colspan="3">ASK</th>
-              <th>TAPE</th>
             </tr>
           </thead>
 
-          <tbody style="font-weight: 600;">
-            <tr>
-              <td>Exchange</td>
-              <td>T volume</td>
-              <td>Volume</td>
-              <td>Price</td>
-              <td>Volume</td>
-              <td>T volume</td>
-              <td>Exchange</td>
-              <td></td>
-            </tr>
-            
-
-            
-              {% for ask in asks %}
-                
-                {% with ask_item=ask.ASKS.0 %}
-                <tr>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td style = "background-color: {{ask.color}}; color: {{ask.fontcolor}};">{{ask.ASK_PRICE}}</td>
-                  <td style = "background-color: {{ask.color}}; color: {{ask.fontcolor}};">{{ask_item.ASK_VOLUME}}</td>
-                  <td rowspan={{ask.NUM_ASKS}} style = "background-color: {{ask.color}}; color: {{ask.fontcolor}};" class = 'total_volume'>{{ask.TOTAL_VOLUME}}</td>
-                  <td style = "background-color: {{ask.color}}; color: {{ask.fontcolor}};">{{ask_item.EXCHANGE}}</td>
-                  
-                </tr>
-
-                {% endwith %}
-
-                {% for ask_item in ask.ASKS %}
-                  {% if forloop.counter > 1 %}
-                        <tr>
-                          <td></td>
-                          <td></td>
-                          <td></td>
-                          <td style = "background-color: {{ask.color}}; color: {{ask.fontcolor}};">{{ask.ASK_PRICE}}</td>
-                          <td style = "background-color: {{ask.color}}; color: {{ask.fontcolor}};">{{ask_item.ASK_VOLUME}}</td>
-                          
-                          <td style = "background-color: {{ask.color}}; color: {{ask.fontcolor}};">{{ask_item.EXCHANGE}}</td>
-                        </tr>
-                  {% endif %}
-                
-                {% endfor %}
-              {% endfor %}
-            
-              {% for price in prices %}
-
-                  <tr>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-
-                  <td>{{price}}</td>
-                  </tr>
-
-              {% endfor %}
-
-              
-              {% for bid in bids %}
-
-                {% with bid_item=bid.BIDS.0 %}
-              
-                <tr>
-                  <td style = "background-color: {{bid.color}}; color: {{bid.fontcolor}};">{{bid_item.EXCHANGE}}</td>
-                  <td rowspan={{bid.NUM_BIDS}} style = "background-color: {{bid.color}}; color: {{bid.fontcolor}};" class = 'total_volume'>{{bid.TOTAL_VOLUME}}</td>
-                  <td style = "background-color: {{bid.color}}; color: {{bid.fontcolor}};">{{bid_item.BID_VOLUME}}</td>
-                  <td style = "background-color: {{bid.color}}; color: {{bid.fontcolor}};">{{bid.BID_PRICE}}</td>
-                </tr>
-
-                {% endwith %}
-
-                {% for bid_item in bid.BIDS %}
-                  {% if forloop.counter > 1 %}
-                        <tr>
-                          <td style = "background-color: {{bid.color}}; color: {{bid.fontcolor}};">{{bid_item.EXCHANGE}}</td>
-                          
-                          <td style = "background-color: {{bid.color}}; color: {{bid.fontcolor}};">{{bid_item.BID_VOLUME}}</td>
-                          <td style = "background-color: {{bid.color}}; color: {{bid.fontcolor}};">{{bid.BID_PRICE}}</td>
-                        </tr>
-                  {% endif %}
-                
-                {% endfor %}
-              {% endfor %}
-
+          <tbody id = "tape_tbody" style="font-weight: 600; line-height: 1;">
+      
           </tbody>
         </table>
+    </div>
   </div>
-  </div>
-
 
 </body>
 
 <script>
+  $(document).ready(function(){
+    $.ajax({
+      url: '/start_stream/',
+      success: function(result) {
+        console.log(result);
+      }
+    });
+  });
+
+  function make_style(){
     const elements = document.getElementsByClassName('total_volume');
     for(let i = 0; i<elements.length; i++){
       total_volume = parseInt(elements[i].innerHTML);
-      if(total_volume>300)
-        elements[i].style.fontSize = "18px";
-      else if(total_volume>1000)
-        elements[i].style.fontSize = "20px";
-      else if(total_volume>10000)
+      rowspan = parseInt(elements[i].rowSpan);
+      if(total_volume>10000)
         elements[i].style.fontSize = "24px";
+      if(rowspan > 1)
+        elements[i].style.fontWeight = 'bold';
     }
+  }
+
+    function updateData() {
+      $.ajax({
+        url: '/get-json-data/',
+        type: 'GET',
+        dataType: 'json',                                                                                                                                     
+        success: function(data) {
+          var bidask_html = "";
+          var tape_html = "";
+
+          // Update the contents of the container element with the new data
+          var jsonobject = JSON.parse(data);
+          var bids = jsonobject['bids'];
+          var asks = jsonobject['asks'];
+          var tapes = jsonobject['tapes'];
+          var prices = jsonobject['prices'];
+          
+          
+
+          for (let i = 0; i < asks.length; i++) {
+              var ask = asks[i];
+              var ask_items = ask.ASKS;
+              bidask_html += "<tr><td></td><td></td><td></td><td style = 'background-color: " + ask.color + "; color:" + ask.fontcolor + ";'>" + ask.ASK_PRICE.toLocaleString() + "</td><td style = 'background-color: " + ask.color + "; color: " + ask.fontcolor + ";''>" + ask_items[0].ASK_VOLUME.toLocaleString() + "</td><td rowspan=" + ask.NUM_ASKS +  " style = 'background-color: " + ask.color + "; color: " + ask.fontcolor + ";'' class = 'total_volume'>" + ask.TOTAL_VOLUME.toLocaleString() + "</td><td style = 'background-color: " + ask.color+ "; color: " + ask.fontcolor + ";''>" + ask_items[0].EXCHANGE+ "</td></tr>";
+
+              for(let j = 1; j < ask_items.length; j++){
+                bidask_html += "<tr><td></td><td></td><td></td><td style = 'background-color: " + ask.color + "; color:" + ask.fontcolor + ";'>" + ask.ASK_PRICE.toLocaleString() + "</td><td style = 'background-color: " + ask.color + "; color: " + ask.fontcolor + ";''>" + ask_items[j].ASK_VOLUME.toLocaleString() + "</td><td style = 'background-color: " + ask.color+ "; color: " + ask.fontcolor + ";''>" + ask_items[j].EXCHANGE+ "</td></tr>";
+              }
+          }
+
+          for (let i = 0; i < prices.length; i++) {
+              var price = prices[i];
+              bidask_html += "<tr><td></td><td></td><td></td><td>" + price + "</td></tr>";
+          }
+          
+          for (let i = 0; i < bids.length; i++) {
+              var bid = bids[i];
+              var bid_items = bid.BIDS;
+              bidask_html += "<tr><td style = 'background-color: "+ bid.color +"; color: "+ bid.fontcolor +";'>"+bid_items[0].EXCHANGE+"</td><td rowspan="+bid.NUM_BIDS+ " style = 'background-color: "+bid.color+"; color: "+bid.fontcolor+";' class = 'total_volume'>"+bid.TOTAL_VOLUME.toLocaleString()+"</td><td style = 'background-color: "+bid.color+"; color: "+bid.fontcolor+";'>"+bid_items[0].BID_VOLUME.toLocaleString()+"</td><td style = 'background-color: "+bid.color+"; color: "+bid.fontcolor+";'>"+bid.BID_PRICE.toLocaleString()+"</td></tr>";
+              //alert(str_html);
+
+              for(let j = 1; j < bid_items.length; j++){
+                bidask_html += "<tr><td style = 'background-color: "+ bid.color +"; color: "+ bid.fontcolor +";'>"+bid_items[j].EXCHANGE+"</td><td style = 'background-color: "+bid.color+"; color: "+bid.fontcolor+";'>"+bid_items[j].BID_VOLUME.toLocaleString()+"</td><td style = 'background-color: "+bid.color+"; color: "+bid.fontcolor+";'>"+bid.BID_PRICE.toLocaleString()+"</td></tr>";
+              }
+          }
+
+          for (let i = 0; i < tapes.length; i++) {
+              var tape = tapes[i];
+              tape_html += "<tr><td class = 'total_volume'>" + tape.LAST_PRICE.toLocaleString() +"</td><td style = 'background-color: " + tape.color + ";'>" + tape.LAST_SIZE.toLocaleString() +"</td></tr>";
+          }
+
+          $('#bidask_tbody').html(bidask_html);
+          $('#tape_tbody').html(tape_html);
+
+          make_style();
+
+        }
+
+
+      });
+    }
+
+    // Call the updateData function every 500 milliseconds
+    setInterval(updateData, 500);
+
 </script>
 
 </html>
